@@ -11,15 +11,31 @@ if($_POST){
                  mkdir($folder, 0755, true);
                 }
 			   if (!empty($_FILES["post_image"]["name"])) {
-		            $filename = $_FILES["post_image"]["name"];
-		            $tempname = $_FILES["post_image"]["tmp_name"];
-		            $newFilePath = $folder . $filename;
+			        $allowedExtensions = array('jpg', 'png', 'jpeg', 'gif', 'pdf', 'doc');
+			        $filename = $_FILES["post_image"]["name"];
+			        $fileExtension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+			        
 
-		            if (move_uploaded_file($tempname, $newFilePath)) {
-		                $m->set_data('post_image', $newFilePath);
-		            } else {
-		                
-		            }
+                    if (in_array($fileExtension, $allowedExtensions)) {
+			            $tempname = $_FILES["post_image"]["tmp_name"];
+			            $newFilePath = $folder . $filename;
+
+
+			            if (move_uploaded_file($tempname, $newFilePath)) {
+			                $m->set_data('post_image', $newFilePath);
+			            } else {
+			                $response["message"] = "File upload failed.";
+			                $response["status"] = "201";
+			                echo json_encode($response);
+			                exit; 
+			            }
+			        }else {
+            
+				            $response["message"] = "Invalid file extension. Allowed extensions are jpg, png, jpeg, gif, pdf, doc.";
+				            $response["status"] = "201";
+				            echo json_encode($response);
+				            exit; 
+                        }  
                 } else {
 		        }
 		        $q = $d->select("student_master","student_id='$student_id'");
